@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Example</title>
+    <script type="text/javascript" src="../Observable/Observable.js"></script>
+    <script type="text/javascript" src="../SelectionManager/SelectionManager.js"></script>
+    <script type="text/javascript" src="ImageViewer.js"></script>
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function() {
+        var iv, tm, cm;
+        var ivs = document.getElementsByClassName("image-carousel");
+        for(var i = 0; i < ivs.length; i++) {
+          if (ivs[i].imageViewer) continue;
+      
+          iv = new ImageViewer();
+
+          tm = new ScrollingSelectionManager(ivs[i].getElementsByClassName('thumbnail-viewer')[0]);
+          iv.registerThumbnailManager(tm);
+
+          cm = new ScrollingSelectionManager(ivs[i].getElementsByClassName('image-canvas')[0]);
+          iv.registerCanvasManager(cm);
+
+          if (!ImageViewer.instances) ImageViewer.instances = [];
+          ImageViewer.instances.push(iv);
+          ivs[i].imageViewer = iv;
+        }
+      });
+    </script>
+
+    <style type="text/css">
+body {
+  text-align: center;
+}
+.wrapper {
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  text-align: left;
+}
+.title {
+  color: #424141;
+}
+.subtitle {
+  font-style: italic;
+  color: #ccc;
+}
+.items-viewer {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.items-viewer .control {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 3rem;
+  color: white;
+  text-shadow: 0 0 1px black;
+  z-index: 10;
+  vertical-align: middle;
+  display: inline-block;
+  line-height: 100px;
+}
+.items-viewer .control.forward {
+  left: auto;
+  right: 0;
+}
+.items-viewer .items-container {
+  white-space: nowrap;
+  position: relative;
+  transition: margin-left .4s;
+}
+.items-viewer .items-container .item {
+  display: inline-block;
+  margin: 8px;
+  line-height: 100px;
+  padding: 0 74px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #06EAFF;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: border-color .2s, background-color .2s, color .2s;
+}
+.items-viewer .item.selected {
+  border-color: #FFAF00;
+  background-color: white;
+  color: #424141;
+}
+
+.items-viewer.image-canvas .items-container .item {
+  margin: 20px;
+  padding: 0 370px;
+  line-height: 500px;
+}
+    </style>
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1 class="title">Selection Manager</h1>
+      <p class="subtitle">Select an item or scroll left or right</p>
+
+      <div class="image-carousel">
+        <div class="image-canvas items-viewer">
+          <div class="control backward"></div>
+          <div class="control forward"></div>
+          <div class="items-container">
+            <div class="item">1</div>
+            <div class="item">2</div>
+            <div class="item">3</div>
+            <div class="item">4</div>
+            <div class="item">5</div>
+            <div class="item">6</div>
+            <div class="item">7</div>
+            <div class="item">8</div>
+            <div class="item">9</div>
+            <div class="item">10</div>
+            <div class="item">11</div>
+            <div class="item">12</div>
+            <div class="item">13</div>
+            <div class="item">14</div>
+            <div class="item">15</div>
+            <div class="item">16</div>
+            <div class="item">17</div>
+          </div>
+        </div>
+
+        <div class="thumbnail-viewer items-viewer">
+          <div class="control backward">&laquo;</div>
+          <div class="control forward">&raquo;</div>
+          <div class="items-container">
+            <div class="item">1</div>
+            <div class="item">2</div>
+            <div class="item">3</div>
+            <div class="item">4</div>
+            <div class="item">5</div>
+            <div class="item">6</div>
+            <div class="item">7</div>
+            <div class="item">8</div>
+            <div class="item">9</div>
+            <div class="item">10</div>
+            <div class="item">11</div>
+            <div class="item">12</div>
+            <div class="item">13</div>
+            <div class="item">14</div>
+            <div class="item">15</div>
+            <div class="item">16</div>
+            <div class="item">17</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>How to use it</h2>
+      <p>(See source code comments for specifics.)</p>
+
+      <p>At a minimum, a SelectionManager should have an outer container with class "items-viewer", an inner container with class "items-container" and items with class "item" within the "items-container" container. It can also have scroll controls with classes "control forward" and "control backward". All class names can be modified by passing an options object into the constructor.</p>
+      <p>It was conceived as a simple thumbnail manager for an image viewer, and therefore was designed to have a scrolling list of thumbnails that you can click on to select. Clicking on an item generates an "itemClick" event, and the subsequent selection of an item (either as a result of clicking or as a result of a programmatic selection) fires an "itemSelectionChange" event. These events notify any external listeners registered using
+      registerExternalListener(eventName, HTMLElement).</p>
+      <p>While it's possible to pass in an animator object that implements the SkelAnimator interface, you can also just use CSS transitions to achieve animations, as in the above example.</p>
+    </div>
+  </body>
+</html>
