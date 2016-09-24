@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Example</title>
+    <script type="text/javascript" src="SimpleAnimator.js"></script>
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function() {
+        // Get items to load
+        var items = document.getElementsByClassName('item');
+
+        // Create animators
+        var cubicAnimator = new SimpleAnimator();
+        var linearAnimator = new SimpleAnimator();
+        linearAnimator.deltaFunction = SimpleAnimator.linear;
+        var duration = 2000;
+
+        // Iterate through items and assign animators
+        var animator;
+        for(var i = 0; i < items.length; i++) {
+          if (i % 2 != 0) animator = linearAnimator;
+          else animator = cubicAnimator;
+          
+          // initialize animation direction
+          items[i].animationDirection = 1;
+
+          // Have to create a closure here to avoid variable confusion
+          items[i].addEventListener('click', (function(elmt,a) { 
+            // This is the real onclick function
+            return function() {
+              a.animate(function(progress) {
+                var start = 5;
+                var end = elmt.parentNode.clientWidth - 105;
+                var diff = end - start;
+                var travel = diff*progress;
+                if (elmt.animationDirection == -1) travel = end - travel;
+                else travel = start + travel;
+                elmt.style.left = travel + "px";
+              }, function() { elmt.animationDirection *= -1; }, duration);
+            }
+          })(items[i], animator));
+        }
+      });
+    </script>
+
+    <style type="text/css">
+body {
+  text-align: center;
+}
+.wrapper {
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  text-align: left;
+}
+.title {
+  color: #424141;
+}
+.subtitle {
+  font-style: italic;
+  color: #ccc;
+}
+
+.item-container {
+  margin: 5px 0;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  position: relative;
+  width: 100%;
+  height: 110px;
+}
+.item-container .item {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  padding: 0 45px;
+  line-height: 100px;
+  border-radius: 4px;
+  border: 1px solid #424141;
+  background-color: #00E9FF;
+  cursor: pointer;
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1 class="title">SimpleAnimator</h1>
+      <p class="subtitle">Click on the boxes to animate</p>
+      <div class="item-container">
+        <div class="item">1</div>
+      </div>
+      <div class="item-container">
+        <div class="item">2</div>
+      </div>
+      <div class="item-container">
+        <div class="item">3</div>
+      </div>
+
+      <h2>How to use it</h2>
+      <p>(See source code comments for specifics.)</p>
+
+      <p>Just create a new instance of SimpleAnimator for each type of animation you'd like to execute. For example, if one animation needs to be linear and another needs to be quadratic, just create two Animator objects, setting their `deltaFunction`s to whatever your needs may be. In the above example, the second div is set to linear, while the other two are set to the default easing function.</p>
+      <p>One thing to be careful with here is to make sure that the function you pass to animate() maintains access to the right variables. In the above example, I had to create a closure to lock in the environment for the function.</p>
+    </div>
+  </body>
+</html>
