@@ -105,7 +105,7 @@ body {
   </head>
   <body>
     <div class="wrapper">
-      <h1 class="title">Selection Manager</h1>
+      <h1 class="title">ImageViewer</h1>
       <p class="subtitle">Select an item or scroll left or right</p>
 
       <div class="image-carousel">
@@ -160,11 +160,9 @@ body {
 
       <h2>How to use it</h2>
       <p>(See source code comments for specifics.)</p>
+      <p>An ImageViewer is just a coordinator for various SelectionManagers, so really SelectionManager is the driver behind this. The ImageViewer can have one or more thumbnail managers and one or more canvas managers. Both thumbnail managers and canvas managers are SelectionManagers. All of these components are kept in sync via ImageViewer's event listener. When any selection is made on any of its managers, it propogates that selection to the other managers.</p>
+      <p>The above example is a simple (lazy) use case. The more common usecase will likely be one in which the canvas manager is a FadingSelectionManager. Also, you may want to consider enabling fullscreen functionality using an onclick listener on the canvas items. This functionality is outside the scope of ImageViewer, as it's relatively straightforward and easy to implement.</p>
 
-      <p>At a minimum, a SelectionManager should have an outer container with class "items-viewer", an inner container with class "items-container" and items with class "item" within the "items-container" container. It can also have scroll controls with classes "control forward" and "control backward". All class names can be modified by passing an options object into the constructor.</p>
-      <p>It was conceived as a simple thumbnail manager for an image viewer, and therefore was designed to have a scrolling list of thumbnails that you can click on to select. Clicking on an item generates an "itemClick" event, and the subsequent selection of an item (either as a result of clicking or as a result of a programmatic selection) fires an "itemSelectionChange" event. These events notify any external listeners registered using
-      registerExternalListener(eventName, HTMLElement).</p>
-      <p>While it's possible to pass in an animator object that implements the SkelAnimator interface, you can also just use CSS transitions to achieve animations, as in the above example.</p>
     </div>
   </body>
 </html>
