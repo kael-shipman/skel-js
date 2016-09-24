@@ -4,11 +4,27 @@
     <meta charset="UTF-8">
     <title>Example</title>
     <script type="text/javascript" src="../Observable/Observable.js"></script>
-    <script type="text/javascript" src="SelectionManager.js"></script>
+    <script type="text/javascript" src="../SelectionManager/SelectionManager.js"></script>
+    <script type="text/javascript" src="ImageViewer.js"></script>
     <script type="text/javascript">
       document.addEventListener('DOMContentLoaded', function() {
-        var sms = document.getElementsByClassName('items-viewer');
-        for(var i = 0; i < sms.length; i++) new ScrollingSelectionManager(sms[i]);
+        var iv, tm, cm;
+        var ivs = document.getElementsByClassName("image-carousel");
+        for(var i = 0; i < ivs.length; i++) {
+          if (ivs[i].imageViewer) continue;
+      
+          iv = new ImageViewer();
+
+          tm = new ScrollingSelectionManager(ivs[i].getElementsByClassName('thumbnail-viewer')[0]);
+          iv.registerThumbnailManager(tm);
+
+          cm = new ScrollingSelectionManager(ivs[i].getElementsByClassName('image-canvas')[0]);
+          iv.registerCanvasManager(cm);
+
+          if (!ImageViewer.instances) ImageViewer.instances = [];
+          ImageViewer.instances.push(iv);
+          ivs[i].imageViewer = iv;
+        }
       });
     </script>
 
@@ -79,6 +95,11 @@ body {
   color: #424141;
 }
 
+.items-viewer.image-canvas .items-container .item {
+  margin: 20px;
+  padding: 0 370px;
+  line-height: 500px;
+}
     </style>
 
   </head>
@@ -86,27 +107,54 @@ body {
     <div class="wrapper">
       <h1 class="title">Selection Manager</h1>
       <p class="subtitle">Select an item or scroll left or right</p>
-      <div class="items-viewer">
-        <div class="control backward">&laquo;</div>
-        <div class="control forward">&raquo;</div>
-        <div class="items-container">
-          <div class="item">1</div>
-          <div class="item">2</div>
-          <div class="item">3</div>
-          <div class="item">4</div>
-          <div class="item">5</div>
-          <div class="item">6</div>
-          <div class="item">7</div>
-          <div class="item">8</div>
-          <div class="item">9</div>
-          <div class="item">10</div>
-          <div class="item">11</div>
-          <div class="item">12</div>
-          <div class="item">13</div>
-          <div class="item">14</div>
-          <div class="item">15</div>
-          <div class="item">16</div>
-          <div class="item">17</div>
+
+      <div class="image-carousel">
+        <div class="image-canvas items-viewer">
+          <div class="control backward"></div>
+          <div class="control forward"></div>
+          <div class="items-container">
+            <div class="item">1</div>
+            <div class="item">2</div>
+            <div class="item">3</div>
+            <div class="item">4</div>
+            <div class="item">5</div>
+            <div class="item">6</div>
+            <div class="item">7</div>
+            <div class="item">8</div>
+            <div class="item">9</div>
+            <div class="item">10</div>
+            <div class="item">11</div>
+            <div class="item">12</div>
+            <div class="item">13</div>
+            <div class="item">14</div>
+            <div class="item">15</div>
+            <div class="item">16</div>
+            <div class="item">17</div>
+          </div>
+        </div>
+
+        <div class="thumbnail-viewer items-viewer">
+          <div class="control backward">&laquo;</div>
+          <div class="control forward">&raquo;</div>
+          <div class="items-container">
+            <div class="item">1</div>
+            <div class="item">2</div>
+            <div class="item">3</div>
+            <div class="item">4</div>
+            <div class="item">5</div>
+            <div class="item">6</div>
+            <div class="item">7</div>
+            <div class="item">8</div>
+            <div class="item">9</div>
+            <div class="item">10</div>
+            <div class="item">11</div>
+            <div class="item">12</div>
+            <div class="item">13</div>
+            <div class="item">14</div>
+            <div class="item">15</div>
+            <div class="item">16</div>
+            <div class="item">17</div>
+          </div>
         </div>
       </div>
 

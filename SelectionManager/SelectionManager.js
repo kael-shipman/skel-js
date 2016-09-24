@@ -10,8 +10,8 @@
  * have a scrolling list of thumbnails that you can click on to select. Clicking on an item generates
  * an "itemClick" event, and the subsequent selection of an item (either as a result of clicking or as
  * a result of a programmatic selection) fires an "itemSelectionChange" event. These events notify any
- * external listeners registered using registerExternalListener(eventName, HTMLElement). External listeners
- * should implement a method called `on[EventName]` to receive the event.
+ * external listeners registered using addEventListener(eventName, HTMLElement). External listeners
+ * should implement a method called `respondToEvent(eventType, observable)` to receive the event.
  *
  * While it's possible to set an animator object that implements the SkelAnimator interface, you
  * can also just use CSS transitions to achieve animations, as in the example provided. To use a custom
@@ -22,6 +22,7 @@
  * where `deltaFunction` is a function that receives a single paramter `delta` that indicates the percentage
  * of change, according to the graph implemented by the object.
  *
+ * @depends skel-js/Observable
  * @author Kael Shipman <kael.shipman@gmail.com>
  * @license GPLv3
  */
@@ -30,6 +31,7 @@
  * SelectionManager constructor.
  *
  * Accomplishes several things:
+ *  * Inherits properties from Observable
  *  * Establishes options, overriding defaults with passed in `options` object
  *  * Stores `container`, `itemsContainer`, `items`, and initial `controls`
  *  * Loads controls as click listeners on their HTML elements
@@ -41,6 +43,9 @@
  *  @constructor
  */
 SelectionManager = function(container, options) {
+  // Inherit from Observable
+  Observable.call(this);
+
   if (!(container instanceof HTMLElement)) throw "'container' must be an HTMLElement object!";
 
   var mergeOptions = function(targ, src) {
@@ -85,220 +90,172 @@ SelectionManager = function(container, options) {
   return this;
 }
 
-SelectionManager.prototype = {
-  constructor : SelectionManager,
-  previousItem : null,
-  selectedItem : null,
-  currentIndex : null,
-  scrollAnimator : null,
+SelectionManager.prototype = Object.create(Observable.prototype);
 
-  /** Checks to make sure the minimum requirements for functionality are met */
-  sanityCheck : function() {
-    var disp, msg;
-    if (getComputedStyle) disp = getComputedStyle(this.itemsContainer).getPropertyValue("display");
-    else if (this.itemsContainer.currentStyle) disp = this.itemsContainer.currentStyle.display;
-    if (disp == "static") {
-      msg = "WARNING: The items container (." + this.options.itemsContainerClass + ") must be an 'offset Parent' in order for the thumbnail selection scroll to work correctly! To be an offset parent, it must have `display` set to anything other than 'static'";
-      if (this.options.squelchWarnings) console.log(msg);
-      else throw msg;
-    }
-  },
+SelectionManager.prototype.previousItem = null,
+SelectionManager.prototype.selectedItem = null,
+SelectionManager.prototype.currentIndex = null,
+SelectionManager.prototype.scrollAnimator = null,
 
-  /**
-   * Registers a control.
-   *
-   * This will normally be either "forward" or "backward", but can accommodate other types of controls,
-   * too. To use other controls, you must add an "on[Control]Click" method for each nonstandard control.
-   *
-   * @param String control - an arbitrary name for the control.
-   * @param HTMLElement elmt - an element to be registered as a control.
-   */
-  registerControl : function(control, elmt) {
-    // Check to see if it's already been added
-    if (!this.controls[control]) this.controls[control] = [];
-    for (var i = 0; i < this.controls[control].length; i++) {
-      if (this.controls[control][i] == elmt) break;
-    }
-
-    // If it hasn't been added yet, add it and load it
-    if (i == this.controls[control].length) {
-      var me = this;
-      var eventName = 'on'+control.substr(0,1).toUpperCase()+control.substr(1)+'Click';
-      this.controls[control].push(elmt);
-      this.registerInternalListener(eventName, elmt);
-    }
-    return this;
-  },
-
-  /**
-   * Registers a low-level click listener on an element that fires a custom Click event.
-   *
-   * This is used to register click events on HTML elements for controls and items, among
-   * possible other things.
-   *
-   * @param String eventName - the full name of the event (e.g., `onForwardClick` or `onItemClick`)
-   * @param HTMLElement elmt - the element to which the click listener will be attached
-   *
-   * Note that this is different from `registerExternalListener` in that `registerExternalListener`
-   * allows any object to be an observer for arbitrary events produced by the object, while
-   * `registerInternalListener` is used to register this object as an observer of HTML Elements'
-   * `click` events. (That is, one is used to register controls, while the other is used to register
-   * responders.)
-   */
-  registerInternalListener : function(eventName, elmt) {
-    var me = this;
-
-    // Check to see if the event is valid
-    if (!this[eventName]) throw 'Error: There are no handlers for `' + eventName + '` on this object.';
-    elmt.addEventListener("click", function(e) { me[eventName].call(me, e.target); });
-    return this;
-  },
-
-  /** Moves the list forward by one */
-
-  onForwardClick : function(elmt) {
-    this.scroll(1);
-  },
-
-  /** Moves the list backward by one */
-
-  onBackwardClick : function(elmt) {
-    this.scroll(-1);
-  },
-
-  /** Selects the item being clicked and notifies select observers */
-
-  onItemClick : function(elmt) {
-    this.selectItem(elmt);
-    this.notifyListeners("itemClick");
-  },
-
-  /**
-   * Scrolls set of items forward or backward, or optionally to `item`
-   *
-   * @param int dir - direction of scroll (positive for forward, negative for backward)
-   * @param HTMLElement item - The item to scroll into the center
-   */
-
-  scroll : function(dir, item) {
-    // Abstract
-    throw "`scroll` is an abstract function that must be implemented. (You may want to use `ScrollingSelectionManager` instead.)";
-  },
-
-  /** Selects an image, implicitly deselecting any currently selected images and notifying observers of the change */
-
-  selectItem : function(elmt) {
-    // Type check
-    if (!(elmt instanceof HTMLElement)) throw "selectItem: `elmt` must be an HTMLElement.";
-
-    // If there's a selected image
-    if (this.selectedItem) {
-      // If it's the same image, just return
-      if (this.selectedItem.isSameNode(elmt)) return;
-
-      // Otherwise, deselect whatever image is currently selected
-      this.deselectItem(this.selectedItem, true);
-    }
-
-    // Add the "selected" class to the element and register it as selected
-    elmt.className += ' '+this.options.selectedClass;
-    this.selectedItem = elmt;
-
-    this.scroll(null, this.selectedItem);
-
-    // Notify change listeners
-    this.notifyListeners("itemSelectionChange");
-  },
-
-  /**
-   * Deselects an image, notifying observers of the change
-   *
-   * @param HTMLElement elmt - The element being deselected (presumably an `item`)
-   * @param boolean squelchNotification - flag used to prevent superfluous notifications
-   */
-  
-  deselectItem : function(elmt, squelchNotification) {
-    // Type check
-    if (!(elmt instanceof HTMLElement)) throw "deselectItem: `elmt` must be an HTMLElement.";
-
-    // Force removal of "selected" class
-    elmt.className = (' ' + elmt.className + ' ').replace(new RegExp(" " + this.options.selectedClass + " "), "").trim();
-
-    // Only do the rest if it's actually selected
-    if (elmt.isSameNode(this.selectedItem)) {
-      // Move element from "selected" to "previous" slot
-      this.previousItem = this.selectedItem;
-      this.selectedItem = null;
-
-      // If we're not squelching the notification, notify observers
-      if (!squelchNotification) this.notifyListeners(itemSelectionChange);
-    }
-  },
-
-  /** Selects item by index */
-
-  selectItemByIndex : function(i) {
-    if (!this.items[i]) throw "Invalid index passed to `SelectionManager.selectItemByIndex`: '" + i +"' when there are " + this.items.length + " items in the collection";
-    this.selectItem(this.items[i]);
-    return this;
-  },
-
-  /** Gets item index */
-
-  getIndexOf : function(elmt) {
-    if (!elmt) return -1;
-    for (var i = this.items.length - 1; i >= 0; i--) {
-      if (this.items[i].isSameNode(elmt)) return i;
-    }
-    return i;
-  },
-
-
-
-
-
-
-  /* Event delegation handling */
-
-  /**
-   * Checks to see if the given `listener` is registered for the given `eventType`
-   *
-   * @param String eventType - an arbitrary string denoting the event type to check
-   * @param Object listener - the object being check
-   */
-  listenerIsRegistered : function(eventType, listener) {
-    for(var i = 0; i < this[eventType + "Listeners"].length; i++) {
-      if (this[eventType + "Listeners"][i] === listener) return true;
-    }
-    return false;
-  },
-
-  /**
-   * Registers an object as an observer of an event generated by this SelectionManager
-   *
-   * @param String eventType - an arbitrary string denoting the event type to be observed
-   * @param Object listener - the object being registered as a listener
-   */
-  registerExternalListener : function(eventType, listener) {
-    if (!this[eventType + "Listeners"]) this[eventType + "Listeners"] = [];
-
-    // Make sure the listener's capable
-    var properName = eventType.substr(0,1).toUpperCase() + eventType.substring(1);
-    if (!listener["on" + properName]) throw "Registered on"+properName+" listeners must implement the `on"+properName+"()` function!";
-
-    // If not already registered, register it
-    if (!this.listenerIsRegistered(eventType, listener)) this[eventType+"Listeners"].push(listener);
-
-    return this;
-  },
-
-  /** Notify observers that the given event has occurred */
-
-  notifyListeners : function(eventType) {
-    // Iterate through observers and notify
-    var properName = eventType.substr(0,1).toUpperCase() + eventType.substring(1);
-    for(var i = 0; i < this[eventType+"Listeners"].length; i++) this[eventType+"Listeners"][i]["on"+properName](this);
+/** Checks to make sure the minimum requirements for functionality are met */
+SelectionManager.prototype.sanityCheck = function() {
+  var disp, msg;
+  if (getComputedStyle) disp = getComputedStyle(this.itemsContainer).getPropertyValue("display");
+  else if (this.itemsContainer.currentStyle) disp = this.itemsContainer.currentStyle.display;
+  if (disp == "static") {
+    msg = "WARNING: The items container (." + this.options.itemsContainerClass + ") must be an 'offset Parent' in order for the thumbnail selection scroll to work correctly! To be an offset parent, it must have `display` set to anything other than 'static'";
+    if (this.options.squelchWarnings) console.log(msg);
+    else throw msg;
   }
+}
+
+/**
+ * Registers a control.
+ *
+ * This will normally be either "forward" or "backward", but can accommodate other types of controls,
+ * too. To use other controls, you must add an "on[Control]Click" method for each nonstandard control.
+ *
+ * @param String control - an arbitrary name for the control.
+ * @param HTMLElement elmt - an element to be registered as a control.
+ */
+SelectionManager.prototype.registerControl = function(control, elmt) {
+  // Check to see if it's already been added
+  if (!this.controls[control]) this.controls[control] = [];
+  for (var i = 0; i < this.controls[control].length; i++) {
+    if (this.controls[control][i] == elmt) break;
+  }
+
+  // If it hasn't been added yet, add it and load it
+  if (i == this.controls[control].length) {
+    var me = this;
+    var eventName = 'on'+control.substr(0,1).toUpperCase()+control.substr(1)+'Click';
+    this.controls[control].push(elmt);
+    this.registerInternalListener(eventName, elmt);
+  }
+  return this;
+}
+
+/**
+ * Registers a low-level click listener on an element that fires a custom Click event.
+ *
+ * This is used to register click events on HTML elements for controls and items, among
+ * possible other things.
+ *
+ * @param String eventName - the full name of the event (e.g., `onForwardClick` or `onItemClick`)
+ * @param HTMLElement elmt - the element to which the click listener will be attached
+ *
+ * Note that this is different from `addEventListener` (inherited from Observable) in that
+ * `addEventListener` allows any object to be an observer for arbitrary events produced by the
+ * object, while `registerInternalListener` is used to register specific controls as an observers of
+ * HTML Elements' `click` events. (That is, one is used to register controls, while the other
+ * is used to register responders.)
+ */
+SelectionManager.prototype.registerInternalListener = function(eventName, elmt) {
+  var me = this;
+
+  // Check to see if the event is valid
+  if (!this[eventName]) throw 'Error: There are no handlers for `' + eventName + '` on this object.';
+  elmt.addEventListener("click", function(e) { me[eventName].call(me, e.target); });
+  return this;
+}
+
+/** Moves the list forward by one */
+
+SelectionManager.prototype.onForwardClick = function(elmt) {
+  this.scroll(1);
+}
+
+/** Moves the list backward by one */
+
+SelectionManager.prototype.onBackwardClick = function(elmt) {
+  this.scroll(-1);
+}
+
+/** Selects the item being clicked and notifies select observers */
+
+SelectionManager.prototype.onItemClick = function(elmt) {
+  this.selectItem(elmt);
+  this.notifyEventListeners("itemClick");
+}
+
+/**
+ * Scrolls set of items forward or backward, or optionally to `item`
+ *
+ * @param int dir - direction of scroll (positive for forward, negative for backward)
+ * @param HTMLElement item - The item to scroll into the center
+ */
+
+SelectionManager.prototype.scroll = function(dir, item) {
+  // Abstract
+  throw "`scroll` is an abstract function that must be implemented. (You may want to use `ScrollingSelectionManager` instead.)";
+}
+
+/** Selects an image, implicitly deselecting any currently selected images and notifying observers of the change */
+
+SelectionManager.prototype.selectItem = function(elmt) {
+  // Type check
+  if (!(elmt instanceof HTMLElement)) throw "selectItem: `elmt` must be an HTMLElement.";
+
+  // If there's a selected image
+  if (this.selectedItem) {
+    // If it's the same image, just return
+    if (this.selectedItem.isSameNode(elmt)) return;
+
+    // Otherwise, deselect whatever image is currently selected
+    this.deselectItem(this.selectedItem, true);
+  }
+
+  // Add the "selected" class to the element and register it as selected
+  elmt.className += ' '+this.options.selectedClass;
+  this.selectedItem = elmt;
+
+  this.scroll(null, this.selectedItem);
+
+  // Notify change listeners
+  this.notifyEventListeners("itemSelectionChange");
+}
+
+/**
+ * Deselects an image, notifying observers of the change
+ *
+ * @param HTMLElement elmt - The element being deselected (presumably an `item`)
+ * @param boolean squelchNotification - flag used to prevent superfluous notifications
+ */
+
+SelectionManager.prototype.deselectItem = function(elmt, squelchNotification) {
+  // Type check
+  if (!(elmt instanceof HTMLElement)) throw "deselectItem: `elmt` must be an HTMLElement.";
+
+  // Force removal of "selected" class
+  elmt.className = (' ' + elmt.className + ' ').replace(new RegExp(" " + this.options.selectedClass + " "), "").trim();
+
+  // Only do the rest if it's actually selected
+  if (elmt.isSameNode(this.selectedItem)) {
+    // Move element from "selected" to "previous" slot
+    this.previousItem = this.selectedItem;
+    this.selectedItem = null;
+
+    // If we're not squelching the notification, notify observers
+    if (!squelchNotification) this.notifyEventListeners(itemSelectionChange);
+  }
+}
+
+/** Selects item by index */
+
+SelectionManager.prototype.selectItemByIndex = function(i) {
+  if (!this.items[i]) throw "Invalid index passed to `SelectionManager.selectItemByIndex`: '" + i +"' when there are " + this.items.length + " items in the collection";
+  this.selectItem(this.items[i]);
+  return this;
+}
+
+/** Gets item index */
+
+SelectionManager.prototype.getIndexOf = function(elmt) {
+  if (!elmt) return -1;
+  for (var i = this.items.length - 1; i >= 0; i--) {
+    if (this.items[i].isSameNode(elmt)) return i;
+  }
+  return i;
 }
 
 
@@ -435,6 +392,6 @@ FadingSelectionManager.prototype.scroll = function(dir, item) {
 }
 
 FadingSelectionManager.prototype.onItemClick = function(elmt) {
-  this.notifyListeners("itemClick");
+  this.notifyEventListeners("itemClick");
 }
 
