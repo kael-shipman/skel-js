@@ -13,7 +13,7 @@
         for(var i = 0; i < ivs.length; i++) {
           if (ivs[i].imageViewer) continue;
       
-          iv = new ImageViewer();
+          iv = new Skel.ImageViewer();
 
           tm = new ScrollingSelectionManager(ivs[i].getElementsByClassName('thumbnail-viewer')[0]);
           iv.registerThumbnailManager(tm);
@@ -21,8 +21,8 @@
           cm = new ScrollingSelectionManager(ivs[i].getElementsByClassName('image-canvas')[0]);
           iv.registerCanvasManager(cm);
 
-          if (!ImageViewer.instances) ImageViewer.instances = [];
-          ImageViewer.instances.push(iv);
+          if (!Skel.ImageViewer.instances) Skel.ImageViewer.instances = [];
+          Skel.ImageViewer.instances.push(iv);
           ivs[i].imageViewer = iv;
         }
       });

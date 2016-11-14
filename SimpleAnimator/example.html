@@ -10,9 +10,9 @@
         var items = document.getElementsByClassName('item');
 
         // Create animators
-        var cubicAnimator = new SimpleAnimator();
-        var linearAnimator = new SimpleAnimator();
-        linearAnimator.deltaFunction = SimpleAnimator.linear;
+        var cubicAnimator = new Skel.SimpleAnimator();
+        var linearAnimator = new Skel.SimpleAnimator();
+        linearAnimator.deltaFunction = Skel.SimpleAnimator.linear;
         var duration = 2000;
 
         // Iterate through items and assign animators

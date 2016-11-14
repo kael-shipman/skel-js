@@ -1,3 +1,5 @@
+if (typeof Skel ==' undefined') Skel = {};
+
 /** ImageViewer - A composite controller for an image viewing mechanism.
  *
  * ImageViewer is meant to be more of a shell that coordinates a number of
@@ -15,17 +17,17 @@
  * 
  */
 
-ImageViewer = function() {
+Skel.ImageViewer = function() {
   // Inherit from Observable
-  Observable.call(this);
+  Skel.Observable.call(this);
   return this;
 }
 
-ImageViewer.prototype = Object.create(Observable.prototype);
-ImageViewer.prototype.constructor = ImageViewer
-ImageViewer.prototype.thumbManagers = []
-ImageViewer.prototype.canvasManagers = []
-ImageViewer.prototype.currentIndex = null
+Skel.ImageViewer.prototype = Object.create(Skel.Observable.prototype);
+Skel.ImageViewer.prototype.constructor = Skel.ImageViewer
+Skel.ImageViewer.prototype.thumbManagers = []
+Skel.ImageViewer.prototype.canvasManagers = []
+Skel.ImageViewer.prototype.currentIndex = null
 
 /**
  * Implementation of listener for selection changes in cnavas and thumb managers.
@@ -37,7 +39,7 @@ ImageViewer.prototype.currentIndex = null
  * via this method.
  */
 
-ImageViewer.prototype.respondToEvent = function(eventType, src) {
+Skel.ImageViewer.prototype.respondToEvent = function(eventType, src) {
   if (eventType == 'itemSelectionChange' && src instanceof SelectionManager) {
     var index = src.getIndexOf(src.selectedItem);
 
@@ -65,7 +67,7 @@ ImageViewer.prototype.respondToEvent = function(eventType, src) {
  * Also registers `this` as an onItemSelectionChange listener
  */
 
-ImageViewer.prototype.registerThumbnailManager = function(thumbnailManager) {
+Skel.ImageViewer.prototype.registerThumbnailManager = function(thumbnailManager) {
   if (!(thumbnailManager instanceof SelectionManager)) throw "Thumbnail manager must be of type SelectionManager or descendent";
   thumbnailManager.addEventListener("itemSelectionChange", this);
   this.thumbManagers.push(thumbnailManager);
@@ -77,7 +79,7 @@ ImageViewer.prototype.registerThumbnailManager = function(thumbnailManager) {
  * Also registers `this` as an onItemSelectionChange listener
  */
 
-ImageViewer.prototype.registerCanvasManager = function(canvasManager) {
+Skel.ImageViewer.prototype.registerCanvasManager = function(canvasManager) {
   canvasManager.addEventListener("itemSelectionChange", this);
   this.canvasManagers.push(canvasManager);
 }
