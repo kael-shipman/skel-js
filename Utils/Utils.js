@@ -35,16 +35,16 @@ Skel.Utils = {
       activeClass : 'active',
       fadeOutDelay : 500,
       fadeInDelay : 20,
-      onFadeIn : null,
-      onFadeOut : null
+      onAppear : null,
+      onDisappear : null
     }, config || {});
     classes = elmt.classList;
     if (classes.contains(config.activeClass)) {
       classes.remove(config.activeClass);
-      setTimeout(function() { elmt.style.display = ''; if (config.onFadeOut) config.onFadeOut(); }, config.fadeOutDelay);
+      setTimeout(function() { elmt.style.display = ''; if (config.onFadeOut) config.onDisappear(); }, config.fadeOutDelay);
     } else {
       elmt.style.display = 'block';
-      setTimeout(function() { classes.add(config.activeClass); if (config.onFadeIn) config.onFadeIn(); }, config.fadeInDelay);
+      setTimeout(function() { classes.add(config.activeClass); if (config.onFadeIn) config.onAppear(); }, config.fadeInDelay);
     }
   },
 
@@ -99,7 +99,7 @@ Skel.Utils = {
         while (!container.classList.contains(cnf.menuContainerClass) && container.tagName != 'body') container = container.parentNode;
 
         var menu = container.getElementsByClassName(cnf.menuItemsContainerClass);
-        for(var i = 0; i < menu.length; i++) Skel.Util.transitionDisplay(menu[i], config);
+        for(var i = 0; i < menu.length; i++) Skel.Utils.transitionDisplay(menu[i], config);
       }
     }, config || {});
 
