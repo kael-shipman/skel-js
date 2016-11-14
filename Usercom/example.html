@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Example</title>
+    <script type="text/javascript" src="../Utils/Utils.js"></script>
+    <script type="text/javascript" src="Usercom.js"></script>
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function() {
+        usercom = new Skel.Usercom();
+        usercom.scrapeExisting();
+
+        var btn = document.getElementsByClassName('produceError');
+        for(var i = 0; i < btn.length; i++) {
+          btn[i].addEventListener('click', function(e) {
+            usercom.alert('errors', 'This is an error message!');
+          });
+        }
+      });
+    </script>
+
+    <style type="text/css">
+body {
+  text-align: center;
+}
+.wrapper {
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  text-align: left;
+}
+.title {
+  color: #424141;
+}
+.subtitle {
+  font-style: italic;
+  color: #ccc;
+}
+
+.block.usercom {
+  position: fixed;
+  width: 100%;
+  max-width: 500px;
+  top: 20%;
+  left: 50%;
+  margin-left: -250px;
+  color: white;
+  z-index:90;
+}
+.block.usercom .block {
+  margin: 20px;
+  border-radius: 7px;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+.block.usercom .block.active {
+  opacity: 1;
+}
+
+.block.usercom .block .msg-container {
+  padding: 15px 20px;
+  position: relative;
+}
+
+.block.usercom h4 {
+  margin: 0;
+}
+.block.usercom p {
+  margin: 0;
+}
+.block.usercom .action-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  cursor: pointer;
+  border: 1px solid white;
+  border-radius: 20px;
+  padding: 0 5px;
+  background-color: rgba(255,255,255,.5);
+  color: #424141;
+}
+.block.errors-log {
+  background-color: #C21700;
+}
+.block.messages-log {
+  overflow: hidden;
+  background-color: #99AD14;
+}
+    </style>
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="block usercom">
+        <section class="block errors-log active" data-logType="errors"><div class="body-frame"><div class="standard-padding msg-container"><h4>Oh no!</h4><p>This is a test error</p><p>This is a another test error</p><p><p class="testerr">This is a test <b>HTML</b> error</p></p><p>This is a test error attached to an element</p><div class="action-close">x</div></div></div></section>
+        <section class="block messages-log active" data-logType="messages"><div class="body-frame"><div class="standard-padding msg-container"><h4>Messages</h4><p>And this is a test message</p><div class="action-close">x</div></div></div></section>
+      </div>
+      <h1 class="title">Usercom</h1>
+      <p class="subtitle">You should see a message on pageload. Click the button below to see an error.</p>
+
+      <button class="produceError">Click for Error</button>
+
+      <h2>How to use it</h2>
+      <p>(See source code comments for specifics.)</p>
+      <p>An ImageViewer is just a coordinator for various SelectionManagers, so really SelectionManager is the driver behind this. The ImageViewer can have one or more thumbnail managers and one or more canvas managers. Both thumbnail managers and canvas managers are SelectionManagers. All of these components are kept in sync via ImageViewer's event listener. When any selection is made on any of its managers, it propogates that selection to the other managers.</p>
+      <p>The above example is a simple (lazy) use case. The more common usecase will likely be one in which the canvas manager is a FadingSelectionManager. Also, you may want to consider enabling fullscreen functionality using an onclick listener on the canvas items. This functionality is outside the scope of ImageViewer, as it's relatively straightforward and easy to implement.</p>
+
+    </div>
+  </body>
+</html>
+
