@@ -92,7 +92,7 @@ Skel.Usercom.prototype.alertFromJson = function(json) {
   for (type in json) {
     msgs = [];
     for(elmt in json[type]['elements']) {
-      for(i = 0; i < json[type]'elements'][elmt].length; i++) msgs.push(json[type]['elements'][elmt][i]);
+      for(i = 0; i < json[type]['elements'][elmt].length; i++) msgs.push(json[type]['elements'][elmt][i]);
     }
     for(i = 0; i < json[type]['general'].length; i++) msgs.push(json[type]['general'][i]);
 
