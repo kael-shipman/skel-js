@@ -159,7 +159,7 @@ Skel.Utils = {
     if (end < 0) end = 0;
     var start = document.body.scrollTop;
     
-    var animator = new SimpleAnimator();
+    var animator = new Skel.SimpleAnimator();
     animator.animate(function(progress) {
       if (start < end) document.body.scrollTop = start*1 + (end-start)*progress;
       else document.body.scrollTop = start*1 - (start-end)*progress;
