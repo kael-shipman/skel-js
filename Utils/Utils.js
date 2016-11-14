@@ -41,10 +41,10 @@ Skel.Utils = {
     classes = elmt.classList;
     if (classes.contains(config.activeClass)) {
       classes.remove(config.activeClass);
-      setTimeout(function() { elmt.style.display = ''; if (config.onFadeOut) config.onDisappear(); }, config.fadeOutDelay);
+      setTimeout(function() { elmt.style.display = ''; if (config.onDisappear) config.onDisappear(); }, config.fadeOutDelay);
     } else {
       elmt.style.display = 'block';
-      setTimeout(function() { classes.add(config.activeClass); if (config.onFadeIn) config.onAppear(); }, config.fadeInDelay);
+      setTimeout(function() { classes.add(config.activeClass); if (config.onAppear) config.onAppear(); }, config.fadeInDelay);
     }
   },
 
@@ -126,7 +126,7 @@ Skel.Utils = {
       links[i].onpageNavLoaded = true;
 
       links[i].addEventListener('click', function(e) {
-        if (config.menuToggleFunction) config.menuToggleFunction();
+        if (config.menuToggleFunction) config.menuToggleFunction(e);
         var sec, elmt;
 
         // Scroll to location, if we're on the same page
@@ -161,8 +161,9 @@ Skel.Utils = {
     
     var animator = new Skel.SimpleAnimator();
     animator.animate(function(progress) {
-      if (start < end) document.body.scrollTop = start*1 + (end-start)*progress;
-      else document.body.scrollTop = start*1 - (start-end)*progress;
+      var body = document.documentElement || document.body;
+      if (start < end) body.scrollTop = start*1 + (end-start)*progress;
+      else body.scrollTop = start*1 - (start-end)*progress;
     });
   },
 
@@ -174,14 +175,13 @@ Skel.Utils = {
    */
   elementOffset : function(elmt) {
     var box = elmt.getBoundingClientRect();
-    var body = document.body;
-    var docEl = document.documentElement;
+    var body = document.documentElement || document.body;
 
-    var scrollTop = window.pageYOffset || docEl.scrollTop || body.scrollTop;
-    var scrollLeft = window.pageXOffset || docEl.scrollLeft || body.scrollLeft;
+    var scrollTop = window.pageYOffset || body.scrollTop;
+    var scrollLeft = window.pageXOffset || body.scrollLeft;
 
-    var clientTop = docEl.clientTop || body.clientTop || 0;
-    var clientLeft = docEl.clientLeft || body.clientLeft || 0;
+    var clientTop = body.clientTop || 0;
+    var clientLeft = body.clientLeft || 0;
 
     var top  = box.top +  scrollTop - clientTop;
     var left = box.left + scrollLeft - clientLeft;
