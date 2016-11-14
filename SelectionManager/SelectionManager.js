@@ -1,3 +1,5 @@
+if (typeof Skel ==' undefined') Skel = {};
+
 /**
  * SelectionManager - An Item selection manager
  *
@@ -27,6 +29,7 @@
  * @license GPLv3
  */
 
+
 /**
  * SelectionManager constructor.
  *
@@ -42,7 +45,7 @@
  *
  *  @constructor
  */
-SelectionManager = function(container, options) {
+Skel.SelectionManager = function(container, options) {
   // Inherit from Observable
   Observable.call(this);
 
@@ -90,15 +93,15 @@ SelectionManager = function(container, options) {
   return this;
 }
 
-SelectionManager.prototype = Object.create(Observable.prototype);
+Skel.SelectionManager.prototype = Object.create(Observable.prototype);
 
-SelectionManager.prototype.previousItem = null,
-SelectionManager.prototype.selectedItem = null,
-SelectionManager.prototype.currentIndex = null,
-SelectionManager.prototype.scrollAnimator = null,
+Skel.SelectionManager.prototype.previousItem = null,
+Skel.SelectionManager.prototype.selectedItem = null,
+Skel.SelectionManager.prototype.currentIndex = null,
+Skel.SelectionManager.prototype.scrollAnimator = null,
 
 /** Checks to make sure the minimum requirements for functionality are met */
-SelectionManager.prototype.sanityCheck = function() {
+Skel.SelectionManager.prototype.sanityCheck = function() {
   var disp, msg;
   if (getComputedStyle) disp = getComputedStyle(this.itemsContainer).getPropertyValue("display");
   else if (this.itemsContainer.currentStyle) disp = this.itemsContainer.currentStyle.display;
@@ -118,7 +121,7 @@ SelectionManager.prototype.sanityCheck = function() {
  * @param String control - an arbitrary name for the control.
  * @param HTMLElement elmt - an element to be registered as a control.
  */
-SelectionManager.prototype.registerControl = function(control, elmt) {
+Skel.SelectionManager.prototype.registerControl = function(control, elmt) {
   // Check to see if it's already been added
   if (!this.controls[control]) this.controls[control] = [];
   for (var i = 0; i < this.controls[control].length; i++) {
@@ -150,7 +153,7 @@ SelectionManager.prototype.registerControl = function(control, elmt) {
  * HTML Elements' `click` events. (That is, one is used to register controls, while the other
  * is used to register responders.)
  */
-SelectionManager.prototype.registerInternalListener = function(eventName, elmt) {
+Skel.SelectionManager.prototype.registerInternalListener = function(eventName, elmt) {
   var me = this;
 
   // Check to see if the event is valid
@@ -161,19 +164,19 @@ SelectionManager.prototype.registerInternalListener = function(eventName, elmt) 
 
 /** Moves the list forward by one */
 
-SelectionManager.prototype.onForwardClick = function(elmt) {
+Skel.SelectionManager.prototype.onForwardClick = function(elmt) {
   this.scroll(1);
 }
 
 /** Moves the list backward by one */
 
-SelectionManager.prototype.onBackwardClick = function(elmt) {
+Skel.SelectionManager.prototype.onBackwardClick = function(elmt) {
   this.scroll(-1);
 }
 
 /** Selects the item being clicked and notifies select observers */
 
-SelectionManager.prototype.onItemClick = function(elmt) {
+Skel.SelectionManager.prototype.onItemClick = function(elmt) {
   this.selectItem(elmt);
   this.notifyEventListeners("itemClick");
 }
@@ -185,14 +188,14 @@ SelectionManager.prototype.onItemClick = function(elmt) {
  * @param HTMLElement item - The item to scroll into the center
  */
 
-SelectionManager.prototype.scroll = function(dir, item) {
+Skel.SelectionManager.prototype.scroll = function(dir, item) {
   // Abstract
   throw "`scroll` is an abstract function that must be implemented. (You may want to use `ScrollingSelectionManager` instead.)";
 }
 
 /** Selects an image, implicitly deselecting any currently selected images and notifying observers of the change */
 
-SelectionManager.prototype.selectItem = function(elmt) {
+Skel.SelectionManager.prototype.selectItem = function(elmt) {
   // Type check
   if (!(elmt instanceof HTMLElement)) throw "selectItem: `elmt` must be an HTMLElement.";
 
@@ -222,7 +225,7 @@ SelectionManager.prototype.selectItem = function(elmt) {
  * @param boolean squelchNotification - flag used to prevent superfluous notifications
  */
 
-SelectionManager.prototype.deselectItem = function(elmt, squelchNotification) {
+Skel.SelectionManager.prototype.deselectItem = function(elmt, squelchNotification) {
   // Type check
   if (!(elmt instanceof HTMLElement)) throw "deselectItem: `elmt` must be an HTMLElement.";
 
@@ -242,15 +245,15 @@ SelectionManager.prototype.deselectItem = function(elmt, squelchNotification) {
 
 /** Selects item by index */
 
-SelectionManager.prototype.selectItemByIndex = function(i) {
-  if (!this.items[i]) throw "Invalid index passed to `SelectionManager.selectItemByIndex`: '" + i +"' when there are " + this.items.length + " items in the collection";
+Skel.SelectionManager.prototype.selectItemByIndex = function(i) {
+  if (!this.items[i]) throw "Invalid index passed to `Skel.SelectionManager.selectItemByIndex`: '" + i +"' when there are " + this.items.length + " items in the collection";
   this.selectItem(this.items[i]);
   return this;
 }
 
 /** Gets item index */
 
-SelectionManager.prototype.getIndexOf = function(elmt) {
+Skel.SelectionManager.prototype.getIndexOf = function(elmt) {
   if (!elmt) return -1;
   for (var i = this.items.length - 1; i >= 0; i--) {
     if (this.items[i].isSameNode(elmt)) return i;
@@ -275,13 +278,13 @@ SelectionManager.prototype.getIndexOf = function(elmt) {
  * forward and backward actions.
  */
 
-ScrollingSelectionManager = function(container, options) {
-  SelectionManager.call(this, container, options);
+Skel.ScrollingSelectionManager = function(container, options) {
+  Skel.SelectionManager.call(this, container, options);
 }
 
-ScrollingSelectionManager.prototype = Object.create(SelectionManager.prototype);
+Skel.ScrollingSelectionManager.prototype = Object.create(Skel.SelectionManager.prototype);
 
-ScrollingSelectionManager.prototype.scroll = function(dir, item) {
+Skel.ScrollingSelectionManager.prototype.scroll = function(dir, item) {
   var me = this;
 
   // Dealing with negative margins, so things are nonintuitive
@@ -306,7 +309,7 @@ ScrollingSelectionManager.prototype.scroll = function(dir, item) {
 
   if (item) {
     // If we're scrolling to an item, calculate its position
-    if (!(item instanceof HTMLElement)) throw "`item` passed to SelectionManager.scroll must be an HTML element within the selection manager's collection";
+    if (!(item instanceof HTMLElement)) throw "`item` passed to Skel.SelectionManager.scroll must be an HTML element within the selection manager's collection";
     interval = (item.offsetLeft + (item.scrollWidth/2) + currentMargin - (this.container.clientWidth/2)) * -1;
   } else {
     // Otherwise, just scroll a good chunk
@@ -348,13 +351,13 @@ ScrollingSelectionManager.prototype.scroll = function(dir, item) {
  * FadingSelectionManager - Manages selections in a stack of elements with fading transitions
  */
 
-FadingSelectionManager = function(container, options) {
-  SelectionManager.call(this, container, options);
+Skel.FadingSelectionManager = function(container, options) {
+  Skel.SelectionManager.call(this, container, options);
 }
 
-FadingSelectionManager.prototype = Object.create(SelectionManager.prototype);
+Skel.FadingSelectionManager.prototype = Object.create(Skel.SelectionManager.prototype);
 
-FadingSelectionManager.prototype.scroll = function(dir, item) {
+Skel.FadingSelectionManager.prototype.scroll = function(dir, item) {
   var me = this;
   var i, prevIndex;
   var targ;
@@ -391,7 +394,7 @@ FadingSelectionManager.prototype.scroll = function(dir, item) {
   return this;
 }
 
-FadingSelectionManager.prototype.onItemClick = function(elmt) {
+Skel.FadingSelectionManager.prototype.onItemClick = function(elmt) {
   this.notifyEventListeners("itemClick");
 }
 

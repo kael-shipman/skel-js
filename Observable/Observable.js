@@ -1,3 +1,5 @@
+if (typeof Skel ==' undefined') Skel = {};
+
 /**
  * Observable - a base Observable class that allows objects to handle and delegate
  * a variety of different events.
@@ -21,10 +23,10 @@
  *
  */
 
-Observable = function() {
+Skel.Observable = function() {
 }
-Observable.prototype = Object.create(Object.prototype);
-Observable.prototype.listeners = {};
+Skel.Observable.prototype = Object.create(Object.prototype);
+Skel.Observable.prototype.listeners = {};
 
 /**
  * Checks to see if the given `listener` is registered for the given `eventType`
@@ -32,7 +34,7 @@ Observable.prototype.listeners = {};
  * @param String eventType - an arbitrary string denoting the event type to check
  * @param Object listener - the object being checked
  */
-Observable.prototype.indexOf = function(eventType, listener) {
+Skel.Observable.prototype.indexOf = function(eventType, listener) {
   for(var i = 0; i < this.listeners[eventType].length; i++) {
     if (this.listeners[eventType][i] === listener) return i;
   }
@@ -45,11 +47,11 @@ Observable.prototype.indexOf = function(eventType, listener) {
  * @param String eventType - an arbitrary string denoting the event type to be observed
  * @param Object listener - the object being registered as a listener
  */
-Observable.prototype.addEventListener = function(eventType, listener) {
+Skel.Observable.prototype.addEventListener = function(eventType, listener) {
   if (!this.listeners[eventType]) this.listeners[eventType] = [];
 
   // Make sure the listener's capable
-  if (!listener.respondToEvent) throw "Registered "+eventType+" listeners must implement the respondToEvent(String eventType, Observable observable)` function!";
+  if (!listener.respondToEvent) throw "Registered "+eventType+" listeners must implement the respondToEvent(String eventType, Skel.Observable observable)` function!";
 
   // If not already registered, register it
   if (this.indexOf(eventType, listener) === false) this.listeners[eventType].push(listener);
@@ -63,7 +65,7 @@ Observable.prototype.addEventListener = function(eventType, listener) {
  * @param String eventType - an arbitrary string denoting the event type of the listener
  * @param Object listener - the object to be removed
  */
-Observable.prototype.removeEventListener = function(eventType, listener) {
+Skel.Observable.prototype.removeEventListener = function(eventType, listener) {
   if ((i = this.indexOf(eventType, listener)) !== false) delete this.listeners[eventType][i];
 }
 
@@ -74,7 +76,7 @@ Observable.prototype.removeEventListener = function(eventType, listener) {
  * @param String eventType - arbitrary string denoting the event type that has just occurred
  */
 
-Observable.prototype.notifyEventListeners = function(eventType) {
+Skel.Observable.prototype.notifyEventListeners = function(eventType) {
   // Iterate through listeners and notify
   if (!this.listeners[eventType]) return;
   for(var i = 0; i < this.listeners[eventType].length; i++) this.listeners[eventType][i].respondToEvent.call(this.listeners[eventType][i], eventType, this);

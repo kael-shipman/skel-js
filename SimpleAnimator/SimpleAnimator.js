@@ -1,3 +1,4 @@
+if (typeof Skel == 'undefined') Skel = {};
 
 /**
  * SimpleAnimator - a barebones animation framework
@@ -14,7 +15,7 @@
  *
  * @param Object options - an optional hash of options to override the defaults
  */
-SimpleAnimator = function(options) {
+Skel.SimpleAnimator = function(options) {
 
   var mergeOptions = function(targ, src) {
     if (!(targ instanceof Object) || !(src instanceof Object)) throw "Target and Source must both be plain objects in mergeOptions";
@@ -30,10 +31,10 @@ SimpleAnimator = function(options) {
   }, options || {});
 }
 
-SimpleAnimator.prototype = Object.create(Object.prototype);
-SimpleAnimator.currentAnimations = [];
-SimpleAnimator.frameRate = 80;
-SimpleAnimator.interval = null;
+Skel.SimpleAnimator.prototype = Object.create(Object.prototype);
+Skel.SimpleAnimator.currentAnimations = [];
+Skel.SimpleAnimator.frameRate = 80;
+Skel.SimpleAnimator.interval = null;
 
 /**
  * animate is the primary function, and is used to start an animation
@@ -53,17 +54,17 @@ SimpleAnimator.interval = null;
  *    constructor)
  * @api
  */
-SimpleAnimator.prototype.animate = function(drawFrame, onFinish, duration) {
+Skel.SimpleAnimator.prototype.animate = function(drawFrame, onFinish, duration) {
   // First, make sure we're not overloading
   // TODO: Fix this! It doesn't work yet
-  for (var j = 0; j < SimpleAnimator.currentAnimations.length; j++) {
-    if (drawFrame == SimpleAnimator.currentAnimations[j]) return;
+  for (var j = 0; j < Skel.SimpleAnimator.currentAnimations.length; j++) {
+    if (drawFrame == Skel.SimpleAnimator.currentAnimations[j]) return;
   }
 
   var me = this;
   var start = new Date;
   var currentAnimationDuration = duration || this.options.duration;
-  SimpleAnimator.currentAnimations.push(function() {
+  Skel.SimpleAnimator.currentAnimations.push(function() {
     var timeElapsed = new Date - start;
     var timePercentage = timeElapsed / currentAnimationDuration;
     if (timePercentage > 1) timePercentage = 1;
@@ -77,7 +78,7 @@ SimpleAnimator.prototype.animate = function(drawFrame, onFinish, duration) {
     return true;
   });
 
-  SimpleAnimator.__startTimer();
+  Skel.SimpleAnimator.__startTimer();
 }
 
 /**
@@ -88,38 +89,38 @@ SimpleAnimator.prototype.animate = function(drawFrame, onFinish, duration) {
  * @param Double timePerc - a number between 0 and 1 indicated the percentage of time elapsed.
  * @api
  */
-SimpleAnimator.prototype.deltaFunction = function(timePerc) {
-  return SimpleAnimator.cubicEase(timePerc);
+Skel.SimpleAnimator.prototype.deltaFunction = function(timePerc) {
+  return Skel.SimpleAnimator.cubicEase(timePerc);
 }
 
 /** The function that starts the timing circuit if it's not already started */
-SimpleAnimator.__startTimer = function() {
-  if (SimpleAnimator.interval != null) return;
-  SimpleAnimator.interval = setInterval(function() {
+Skel.SimpleAnimator.__startTimer = function() {
+  if (Skel.SimpleAnimator.interval != null) return;
+  Skel.SimpleAnimator.interval = setInterval(function() {
     var i = 0;
-    while (i < SimpleAnimator.currentAnimations.length) {
-      if (!SimpleAnimator.currentAnimations[i]()) SimpleAnimator.currentAnimations.splice(i, 1);
+    while (i < Skel.SimpleAnimator.currentAnimations.length) {
+      if (!Skel.SimpleAnimator.currentAnimations[i]()) Skel.SimpleAnimator.currentAnimations.splice(i, 1);
       else i++;
     }
     if (i == 0) {
-      clearInterval(SimpleAnimator.interval);
-      SimpleAnimator.interval = null;
+      clearInterval(Skel.SimpleAnimator.interval);
+      Skel.SimpleAnimator.interval = null;
     }
-  }, Math.round(1000 / SimpleAnimator.frameRate));
+  }, Math.round(1000 / Skel.SimpleAnimator.frameRate));
 }
 
 /** The function that stops the timing circuit */
-SimpleAnimator.__stopTimer = function() {
-  if (SimpleAnimator.interval == null) return;
-  stopInterval(SimpleAnimator.interval);
-  SimpleAnimator.interval = null;
+Skel.SimpleAnimator.__stopTimer = function() {
+  if (Skel.SimpleAnimator.interval == null) return;
+  stopInterval(Skel.SimpleAnimator.interval);
+  Skel.SimpleAnimator.interval = null;
 }
 
 /**
  * Stop all animations
  */
-SimpleAnimator.prototype.stopAll = function() {
-  SimpleAnimator.currentAnimations = [];
+Skel.SimpleAnimator.prototype.stopAll = function() {
+  Skel.SimpleAnimator.currentAnimations = [];
 }
 
 
@@ -130,11 +131,11 @@ SimpleAnimator.prototype.stopAll = function() {
 
 /** A cubic s-curve that gives an ease in and out. */
 
-SimpleAnimator.cubicEase = function(timePerc) {
+Skel.SimpleAnimator.cubicEase = function(timePerc) {
   if (timePerc < .5) return 4 * Math.pow(timePerc, 3);
   else return (4 * Math.pow(timePerc-1, 3)) + 1;
 }
 
 /** A linear animation */
-SimpleAnimator.linear = function(timePerc) { return timePerc; }
+Skel.SimpleAnimator.linear = function(timePerc) { return timePerc; }
 
