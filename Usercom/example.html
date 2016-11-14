@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Example</title>
+    <title>Usercom Example</title>
     <script type="text/javascript" src="../Utils/Utils.js"></script>
     <script type="text/javascript" src="Usercom.js"></script>
     <script type="text/javascript">
@@ -102,9 +102,10 @@ body {
 
       <h2>How to use it</h2>
       <p>(See source code comments for specifics.)</p>
-      <p>An ImageViewer is just a coordinator for various SelectionManagers, so really SelectionManager is the driver behind this. The ImageViewer can have one or more thumbnail managers and one or more canvas managers. Both thumbnail managers and canvas managers are SelectionManagers. All of these components are kept in sync via ImageViewer's event listener. When any selection is made on any of its managers, it propogates that selection to the other managers.</p>
-      <p>The above example is a simple (lazy) use case. The more common usecase will likely be one in which the canvas manager is a FadingSelectionManager. Also, you may want to consider enabling fullscreen functionality using an onclick listener on the canvas items. This functionality is outside the scope of ImageViewer, as it's relatively straightforward and easy to implement.</p>
-
+      <p>The Skel-JS Usercom is actually a sister implementation to the Skel-PHP Usercom, though they work differently. In both cases, you can add messages to one or more error logs, optionally flagging that the message is associated with a specific element or that it's preformatted HTML. However, because of the inherently different end goals of the two systems (the one to aggregate messages and send them preformatted to the interface, and the other to display immediately on an existing user
+      interface), the two entities don't actually seem very related.</p>
+      <p>In the case of this JS implementation, it is intended to be used like a standard "alert", but with the possibility of improved styling. In the future it will likely be implmented as a Skel.Dialog, which will be fully configurable, but for now the intention was to keep it simple.</p>
+      <p>It has a built-in function (`scrapeExisting`) for assuming control of a set of dialog boxes sent preformatted from the server, as well as a currently unimplemented `elementMessageHanlder` that is intended to outsource the handling of element-specific messages. On top of this, it has an `alertFromJson` method that accepts a JSON dump from the server and converts it into alerts on the client.</p>
     </div>
   </body>
 </html>
