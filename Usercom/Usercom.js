@@ -86,6 +86,21 @@ Skel.Usercom.prototype.alert = function(type, msg, elmtSelector, isHtml) {
   }
 }
 
+Skel.Usercom.prototype.alertFromJson = function(json) {
+  var type, elmt, msgs, i, j;
+  json = JSON.parse(json);
+  for (type in json) {
+    msgs = [];
+    for(elmt in json[type]['elements']) {
+      for(i = 0; i < json[type]'elements'][elmt].length; i++) msgs.push(json[type]['elements'][elmt][i]);
+    }
+    for(i = 0; i < json[type]['general'].length; i++) msgs.push(json[type]['general'][i]);
+
+    for(i = 0; i < msgs.length; i++) this.alert(type, msgs[i].msg, msgs[i].elmtSelector, msgs[i].isHtml);
+  }
+}
+
+
 Skel.Usercom.prototype.loadCloseLinks = function(container) {
   var closeLinks, j, type, containerClass;
   type = this.getLogType(container);
