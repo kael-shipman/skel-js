@@ -44,10 +44,10 @@ Skel.Usercom.prototype.scrapeExisting = function() {
 
 Skel.Usercom.prototype.elementMessageHandler = null;
 
-Skel.Usercom.prototype.alert = function(type, msg, elmtSelector, isHtml) {
+Skel.Usercom.prototype.alert = function(type, heading, msg, sticky, elmtSelector, isHtml) {
   if (elmtSelector && this.elementMessageHandler) this.elementMessageHandler(type, msg, elmtSelector, isHtml);
   else {
-    var i, j, selector, logHTML, log, templateVars, logContainer, div;
+    var i, j, selector, logHTML, log, templateVars, logContainer, div, first;
     var usercom = this;
 
     // Prepare message
@@ -61,12 +61,13 @@ Skel.Usercom.prototype.alert = function(type, msg, elmtSelector, isHtml) {
       div.innerHTML = msg;
       msg = div.children[0];
       for(i = 0; i < log.length; i++) log[i].appendChild(msg);
+      first = false;
 
     // If not showing, create it from template
     } else {
       // Set up template and variables from config
       templateVars = this.config.logTemplateVars || {};
-      templateVars['##heading##'] = this.config.typeSpecificAttrs[type]['heading'];
+      templateVars['##heading##'] = heading;
       templateVars['##type##'] = type;
       templateVars['##msg##'] = msg;
       logHTML = this.config.logTemplate;
@@ -79,10 +80,12 @@ Skel.Usercom.prototype.alert = function(type, msg, elmtSelector, isHtml) {
         log = logContainer[i].getElementsByClassName(type+this.config.logBaseClass);
         for(j = 0; j < log.length; j++) this.loadCloseLinks(log[j]);
       }
+      first = true;
     }
 
-    // Reset the timeout for this log
-    this.setLogTimeout(type, (new Date()).getTime() + (this.config.logTimeoutSeconds*1000));
+    // Handle stickiness
+    if (sticky) this.timeouts[type] = null;
+    else if (first || this.timeouts[type]) this.setLogTimeout(type, (new Date()).getTime() + (this.config.logTimeoutSeconds*1000));
   }
 }
 
@@ -96,7 +99,7 @@ Skel.Usercom.prototype.alertFromJson = function(json) {
     }
     for(i = 0; i < json[type]['general'].length; i++) msgs.push(json[type]['general'][i]);
 
-    for(i = 0; i < msgs.length; i++) this.alert(type, msgs[i].msg, msgs[i].elmtSelector, msgs[i].isHtml);
+    for(i = 0; i < msgs.length; i++) this.alert(type, this.config.typeSpecificAttrs[type].heading, msgs[i].msg, false, msgs[i].elmtSelector, msgs[i].isHtml);
   }
 }
 
@@ -149,13 +152,14 @@ Skel.Usercom.prototype.destroyLog = function(type, immediate) {
       logs[i].parentNode.removeChild(logs[i]);
     } else {
       Skel.Utils.transitionDisplay(logs[i], {
-        fadeOutDelay : 2500,
-        onFadeOut : (function(elmt) { return function() {
+        disappearDelay : 2500,
+        onDisappear : (function(elmt) { return function() {
           elmt.parentNode.removeChild(elmt);
         }})(logs[i])
       });
     }
   }
 }
+
 
 

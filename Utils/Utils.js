@@ -23,8 +23,8 @@ Skel.Utils = {
    * will set display=none after the active class is removed, and display=block before it
    * is applied again.
    *
-   * Set config.fadeOutDelay to control how long to wait before setting display=none.
-   * (config.fadeInDelay is really just a technical necessity because for some reason
+   * Set config.disappearDelay to control how long to wait before setting display=none.
+   * (config.appearDelay is really just a technical necessity because for some reason
    * the browser wouldn't honor the transition if the classname were added too close to
    * toggling the display).
    *
@@ -33,18 +33,18 @@ Skel.Utils = {
   transitionDisplay : function(elmt, config) {
     config = Skel.Utils.merge({
       activeClass : 'active',
-      fadeOutDelay : 500,
-      fadeInDelay : 20,
+      disappearDelay : 500,
+      appearDelay : 20,
       onAppear : null,
       onDisappear : null
     }, config || {});
     classes = elmt.classList;
     if (classes.contains(config.activeClass)) {
       classes.remove(config.activeClass);
-      setTimeout(function() { elmt.style.display = ''; if (config.onDisappear) config.onDisappear(); }, config.fadeOutDelay);
+      setTimeout(function() { elmt.style.display = ''; if (config.onDisappear) config.onDisappear(); }, config.disappearDelay);
     } else {
       elmt.style.display = 'block';
-      setTimeout(function() { classes.add(config.activeClass); if (config.onAppear) config.onAppear(); }, config.fadeInDelay);
+      setTimeout(function() { classes.add(config.activeClass); if (config.onAppear) config.onAppear(); }, config.appearDelay);
     }
   },
 
@@ -157,13 +157,12 @@ Skel.Utils = {
   scrollToElement : function(elmt) {
     var end = Skel.Utils.elementOffset(elmt).top - 100;
     if (end < 0) end = 0;
-    var start = document.body.scrollTop;
+    var start = document.documentElement.scrollTop || document.body.scrollTop;
     
     var animator = new Skel.SimpleAnimator();
     animator.animate(function(progress) {
-      var body = document.documentElement || document.body;
-      if (start < end) body.scrollTop = start*1 + (end-start)*progress;
-      else body.scrollTop = start*1 - (start-end)*progress;
+      if (start < end) window.scrollTo(0, start*1 + (end-start)*progress);
+      else window.scrollTo(0, start*1 - (start-end)*progress);
     });
   },
 
@@ -175,13 +174,12 @@ Skel.Utils = {
    */
   elementOffset : function(elmt) {
     var box = elmt.getBoundingClientRect();
-    var body = document.documentElement || document.body;
 
-    var scrollTop = window.pageYOffset || body.scrollTop;
-    var scrollLeft = window.pageXOffset || body.scrollLeft;
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+    var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft;
 
-    var clientTop = body.clientTop || 0;
-    var clientLeft = body.clientLeft || 0;
+    var clientTop = document.documentElement.clientTop || document.body.clientTop || 0;
+    var clientLeft = document.documentElement.clientLeft || document.body.clientLeft || 0;
 
     var top  = box.top +  scrollTop - clientTop;
     var left = box.left + scrollLeft - clientLeft;

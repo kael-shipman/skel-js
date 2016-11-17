@@ -7,13 +7,15 @@
     <script type="text/javascript" src="Usercom.js"></script>
     <script type="text/javascript">
       document.addEventListener('DOMContentLoaded', function() {
-        usercom = new Skel.Usercom();
+        usercom = new Skel.Usercom({ logTimeoutSeconds : 2 });
         usercom.scrapeExisting();
 
         var btn = document.getElementsByClassName('produceError');
         for(var i = 0; i < btn.length; i++) {
           btn[i].addEventListener('click', function(e) {
-            usercom.alert('errors', 'This is an error message!');
+            var sticky = false;
+            if (e.target.classList.contains('sticky')) sticky = true;
+            usercom.alert('errors', 'Uh oh!', 'This is an error message!', sticky);
           });
         }
       });
@@ -99,6 +101,7 @@ body {
       <p class="subtitle">You should see a message on pageload. Click the button below to see an error.</p>
 
       <button class="produceError">Click for Error</button>
+      <button class="produceError sticky">Click for Sticky Error</button>
 
       <h2>How to use it</h2>
       <p>(See source code comments for specifics.)</p>
