@@ -39,38 +39,44 @@ body {
   color: #ccc;
 }
 
-.block.usercom {
+.usercom {
+  text-align: center;
+  padding: 0;
+  margin: 0;
   position: fixed;
   width: 100%;
-  max-width: 500px;
-  top: 20%;
-  left: 50%;
-  margin-left: -250px;
+  height: 100%;
+  top: 0;
+  left: 0;
   color: white;
   z-index:90;
 }
-.block.usercom .block {
-  margin: 20px;
+.usercom > .block {
+  text-align: left;
+  margin: 20px auto;
   border-radius: 7px;
   opacity: 0;
   transition: opacity 2s ease;
+  max-width: 500px;
+  max-height: 40%;
+  overflow: auto;
 }
-.block.usercom .block.active {
+.usercom .block.active {
   opacity: 1;
 }
 
-.block.usercom .block .msg-container {
+.usercom .block .msg-container {
   padding: 15px 20px;
   position: relative;
 }
 
-.block.usercom h4 {
+.usercom h4 {
   margin: 0;
 }
-.block.usercom p {
+.usercom p {
   margin: 0;
 }
-.block.usercom .action-close {
+.usercom .action-close {
   position: absolute;
   top: 15px;
   right: 20px;
@@ -93,10 +99,6 @@ body {
   </head>
   <body>
     <div class="wrapper">
-      <div class="block usercom">
-        <section class="block errors-log active" data-logType="errors"><div class="body-frame"><div class="standard-padding msg-container"><h4>Oh no!</h4><p>This is a test error</p><p>This is a another test error</p><p><p class="testerr">This is a test <b>HTML</b> error</p></p><p>This is a test error attached to an element</p><div class="action-close">x</div></div></div></section>
-        <section class="block messages-log active" data-logType="messages"><div class="body-frame"><div class="standard-padding msg-container"><h4>Messages</h4><p>And this is a test message</p><div class="action-close">x</div></div></div></section>
-      </div>
       <h1 class="title">Usercom</h1>
       <p class="subtitle">You should see a message on pageload. Click the button below to see an error.</p>
 
@@ -109,6 +111,11 @@ body {
       interface), the two entities don't actually seem very related.</p>
       <p>In the case of this JS implementation, it is intended to be used like a standard "alert", but with the possibility of improved styling. In the future it will likely be implmented as a Skel.Dialog, which will be fully configurable, but for now the intention was to keep it simple.</p>
       <p>It has a built-in function (`scrapeExisting`) for assuming control of a set of dialog boxes sent preformatted from the server, as well as a currently unimplemented `elementMessageHanlder` that is intended to outsource the handling of element-specific messages. On top of this, it has an `alertFromJson` method that accepts a JSON dump from the server and converts it into alerts on the client.</p>
+    </div>
+
+    <div class="block usercom">
+      <section class="block errors-log active" data-logType="errors"><div class="body-frame"><div class="standard-padding msg-container"><h4>Oh no!</h4><p>This is a test error</p><p>This is a another test error</p><p><p class="testerr">This is a test <b>HTML</b> error</p></p><p>This is a test error attached to an element</p><div class="action-close">x</div></div></div></section>
+      <section class="block messages-log active" data-logType="messages"><div class="body-frame"><div class="standard-padding msg-container"><h4>Messages</h4><p>And this is a test message</p><div class="action-close">x</div></div></div></section>
     </div>
   </body>
 </html>
