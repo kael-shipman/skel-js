@@ -1,4 +1,4 @@
-if (typeof Skel ==' undefined') Skel = {};
+if (typeof Skel == 'undefined') Skel = {};
 
 /**
  * Observable - a base Observable class that allows objects to handle and delegate

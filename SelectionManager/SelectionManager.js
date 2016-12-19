@@ -1,4 +1,4 @@
-if (typeof Skel ==' undefined') Skel = {};
+if (typeof Skel == 'undefined') Skel = {};
 
 /**
  * SelectionManager - An Item selection manager
@@ -47,7 +47,7 @@ if (typeof Skel ==' undefined') Skel = {};
  */
 Skel.SelectionManager = function(container, options) {
   // Inherit from Observable
-  Observable.call(this);
+  Skel.Observable.call(this);
 
   if (!(container instanceof HTMLElement)) throw "'container' must be an HTMLElement object!";
 
@@ -93,7 +93,7 @@ Skel.SelectionManager = function(container, options) {
   return this;
 }
 
-Skel.SelectionManager.prototype = Object.create(Observable.prototype);
+Skel.SelectionManager.prototype = Object.create(Skel.Observable.prototype);
 
 Skel.SelectionManager.prototype.previousItem = null,
 Skel.SelectionManager.prototype.selectedItem = null,

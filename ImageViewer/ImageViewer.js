@@ -1,4 +1,4 @@
-if (typeof Skel ==' undefined') Skel = {};
+if (typeof Skel == 'undefined') Skel = {};
 
 /** ImageViewer - A composite controller for an image viewing mechanism.
  *
@@ -40,7 +40,7 @@ Skel.ImageViewer.prototype.currentIndex = null
  */
 
 Skel.ImageViewer.prototype.respondToEvent = function(eventType, src) {
-  if (eventType == 'itemSelectionChange' && src instanceof SelectionManager) {
+  if (eventType == 'itemSelectionChange' && src instanceof Skel.SelectionManager) {
     var index = src.getIndexOf(src.selectedItem);
 
     // Only notify other observers if the selection has actually changed
@@ -68,7 +68,7 @@ Skel.ImageViewer.prototype.respondToEvent = function(eventType, src) {
  */
 
 Skel.ImageViewer.prototype.registerThumbnailManager = function(thumbnailManager) {
-  if (!(thumbnailManager instanceof SelectionManager)) throw "Thumbnail manager must be of type SelectionManager or descendent";
+  if (!(thumbnailManager instanceof Skel.SelectionManager)) throw "Thumbnail manager must be of type SelectionManager or descendent";
   thumbnailManager.addEventListener("itemSelectionChange", this);
   this.thumbManagers.push(thumbnailManager);
 }
