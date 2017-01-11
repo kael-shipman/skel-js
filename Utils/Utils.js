@@ -185,6 +185,31 @@ Skel.Utils = {
     var left = box.left + scrollLeft - clientLeft;
 
     return { top: Math.round(top), left: Math.round(left) };
-  } 
+  },
+
+  createFullscreenApi : function(elmt) {
+    var api = {};
+    if (document.fullscreenElement) api.fullscreenElement = document.fullscreenElement;
+    else if (document.webkitFullscreenElement) api.fullscreenElement = document.webkitFullscreenElement;
+    else if (document.mozFullScreenElement) api.fullscreenElement = document.mozFullScreenElement;
+    else if (document.msFullscreenElement) api.fullscreenElement = document.msFullscreenElement;
+
+    if (document.fullscreenEnabled) api.fullscreenEnabled = document.fullscreenEnabled;
+    else if (document.webkitFullscreenEnabled) api.fullscreenEnabled = document.webkitFullscreenEnabled;
+    else if (document.mozFullScreenEnabled) api.fullscreenEnabled = document.mozFullScreenEnabled;
+    else if (document.msFullscreenEnabled) api.fullscreenEnabled = document.msFullscreenEnabled;
+
+    if (document.exitFullscreen) api.exitFullscreen = function() { document.exitFullscreen.call(document) };
+    else if (document.webkitExitFullscreen) api.exitFullscreen = function() { document.webkitExitFullscreen.call(document) };
+    else if (document.mozExitFullScreen) api.exitFullscreen = function() { document.mozExitFullScreen.call(document) };
+    else if (document.msExitFullscreen) api.exitFullscreen = function() { document.msExitFullscreen.call(document) };
+
+    if (elmt.requestFullscreen) api.requestFullscreen = function() { elmt.requestFullscreen.call(elmt) };
+    else if (elmt.webkitRequestFullscreen) api.requestFullscreen = function() { elmt.webkitRequestFullscreen.call(elmt) };
+    else if (elmt.msRequestFullscreen) api.requestFullscreen = function() { elmt.msRequestFullscreen.call(elmt) };
+    else if (elmt.mozRequestFullScreen) api.requestFullscreen = function() { elmt.mozRequestFullScreen.call(elmt) };
+
+    return api;
+  }
 }
 
