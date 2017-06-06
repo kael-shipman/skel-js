@@ -59,7 +59,7 @@ Skel.Utils = {
       targClass : 'email-address',
       addrAttr : 'data-email',
       subjAttr : 'data-subject',
-      transFunction : function(email) { return email.replace('-(AT)-','@').replace('-(DOT)-','.'); }
+      transFunction : function(email) { return email.replace('-(AT)-','@').replace(/-\(DOT\)-/g,'.'); }
     }, config || {});
 
     var emails = document.getElementsByClassName(config.targClass);
