@@ -1,0 +1,19 @@
+{
+    "name" : "skel/skel-js",
+    "description" : "A collection of javascript libraries under the Skel banner",
+    "type" : "library",
+    "keywords" : ["javascript"],
+    "license" : "MIT",
+    "authors" : [
+        {
+            "name" : "Kael Shipman",
+            "email" : "kael.shipman@gmail.com",
+            "homepage" : "https://colors.kaelshipman.me",
+            "role" : "Developer"
+        }
+    ],
+    "require" : {
+    },
+    "require-dev" : {
+    }
+}

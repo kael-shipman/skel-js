@@ -59,7 +59,7 @@ Skel.Utils = {
       targClass : 'email-address',
       addrAttr : 'data-email',
       subjAttr : 'data-subject',
-      transFunction : function(email) { return email.replace('-(AT)-','@').replace('-(DOT)-','.'); }
+      transFunction : function(email) { return email.replace('-(AT)-','@').replace(/-\(DOT\)-/g,'.'); }
     }, config || {});
 
     var emails = document.getElementsByClassName(config.targClass);
@@ -210,6 +210,19 @@ Skel.Utils = {
     else if (elmt.mozRequestFullScreen) api.requestFullscreen = function() { elmt.mozRequestFullScreen.call(elmt) };
 
     return api;
+  },
+
+  implements : function(iface, obj) {
+      if (typeof iface == 'string') {
+          if (typeof Skel.interfaces == 'undefined' || typeof Skel.interfaces[iface] == 'undefined') throw "No interface '"+iface+"' defined! You can define this interface by adding an array with interface methods and property names to the Skel.interfaces hash like so: `Skel.interfaces['"+iface+"'] = [ 'method1', 'method2', 'property1', 'property2', '...' ];`";
+          iface = Skel.interfaces[iface];
+      } else {
+          if (typeof iface != 'object' || typeof iface.length == 'undefined') throw "You must pass either an array containing method and property names or the name of a defined interface as the first parameter!";
+      }
+      for (var i = 0; i < iface.length; i++) {
+          if (typeof obj[iface[i]] == 'undefined') return false;
+      }
+      return true;
   }
 }
 
