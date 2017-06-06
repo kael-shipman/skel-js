@@ -23,8 +23,8 @@ Skel.Utils = {
    * will set display=none after the active class is removed, and display=block before it
    * is applied again.
    *
-   * Set config.fadeOutDelay to control how long to wait before setting display=none.
-   * (config.fadeInDelay is really just a technical necessity because for some reason
+   * Set config.disappearDelay to control how long to wait before setting display=none.
+   * (config.appearDelay is really just a technical necessity because for some reason
    * the browser wouldn't honor the transition if the classname were added too close to
    * toggling the display).
    *
@@ -33,18 +33,18 @@ Skel.Utils = {
   transitionDisplay : function(elmt, config) {
     config = Skel.Utils.merge({
       activeClass : 'active',
-      fadeOutDelay : 500,
-      fadeInDelay : 20,
-      onFadeIn : null,
-      onFadeOut : null
+      disappearDelay : 500,
+      appearDelay : 20,
+      onAppear : null,
+      onDisappear : null
     }, config || {});
     classes = elmt.classList;
     if (classes.contains(config.activeClass)) {
       classes.remove(config.activeClass);
-      setTimeout(function() { elmt.style.display = ''; if (config.onFadeOut) config.onFadeOut(); }, config.fadeOutDelay);
+      setTimeout(function() { elmt.style.display = ''; if (config.onDisappear) config.onDisappear(); }, config.disappearDelay);
     } else {
       elmt.style.display = 'block';
-      setTimeout(function() { classes.add(config.activeClass); if (config.onFadeIn) config.onFadeIn(); }, config.fadeInDelay);
+      setTimeout(function() { classes.add(config.activeClass); if (config.onAppear) config.onAppear(); }, config.appearDelay);
     }
   },
 
@@ -59,7 +59,7 @@ Skel.Utils = {
       targClass : 'email-address',
       addrAttr : 'data-email',
       subjAttr : 'data-subject',
-      transFunction : function(email) { return email.replace('-(AT)-','@').replace('-(DOT)-','.'); }
+      transFunction : function(email) { return email.replace('-(AT)-','@').replace(/-\(DOT\)-/g,'.'); }
     }, config || {});
 
     var emails = document.getElementsByClassName(config.targClass);
@@ -99,7 +99,7 @@ Skel.Utils = {
         while (!container.classList.contains(cnf.menuContainerClass) && container.tagName != 'body') container = container.parentNode;
 
         var menu = container.getElementsByClassName(cnf.menuItemsContainerClass);
-        for(var i = 0; i < menu.length; i++) Skel.Util.transitionDisplay(menu[i], config);
+        for(var i = 0; i < menu.length; i++) Skel.Utils.transitionDisplay(menu[i], config);
       }
     }, config || {});
 
@@ -126,7 +126,7 @@ Skel.Utils = {
       links[i].onpageNavLoaded = true;
 
       links[i].addEventListener('click', function(e) {
-        if (config.menuToggleFunction) config.menuToggleFunction();
+        if (config.menuToggleFunction) config.menuToggleFunction(e);
         var sec, elmt;
 
         // Scroll to location, if we're on the same page
@@ -157,12 +157,12 @@ Skel.Utils = {
   scrollToElement : function(elmt) {
     var end = Skel.Utils.elementOffset(elmt).top - 100;
     if (end < 0) end = 0;
-    var start = document.body.scrollTop;
+    var start = document.documentElement.scrollTop || document.body.scrollTop;
     
-    var animator = new SimpleAnimator();
+    var animator = new Skel.SimpleAnimator();
     animator.animate(function(progress) {
-      if (start < end) document.body.scrollTop = start*1 + (end-start)*progress;
-      else document.body.scrollTop = start*1 - (start-end)*progress;
+      if (start < end) window.scrollTo(0, start*1 + (end-start)*progress);
+      else window.scrollTo(0, start*1 - (start-end)*progress);
     });
   },
 
@@ -174,19 +174,55 @@ Skel.Utils = {
    */
   elementOffset : function(elmt) {
     var box = elmt.getBoundingClientRect();
-    var body = document.body;
-    var docEl = document.documentElement;
 
-    var scrollTop = window.pageYOffset || docEl.scrollTop || body.scrollTop;
-    var scrollLeft = window.pageXOffset || docEl.scrollLeft || body.scrollLeft;
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+    var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft;
 
-    var clientTop = docEl.clientTop || body.clientTop || 0;
-    var clientLeft = docEl.clientLeft || body.clientLeft || 0;
+    var clientTop = document.documentElement.clientTop || document.body.clientTop || 0;
+    var clientLeft = document.documentElement.clientLeft || document.body.clientLeft || 0;
 
     var top  = box.top +  scrollTop - clientTop;
     var left = box.left + scrollLeft - clientLeft;
 
     return { top: Math.round(top), left: Math.round(left) };
-  } 
+  },
+
+  createFullscreenApi : function(elmt) {
+    var api = {};
+    if (document.fullscreenElement) api.fullscreenElement = document.fullscreenElement;
+    else if (document.webkitFullscreenElement) api.fullscreenElement = document.webkitFullscreenElement;
+    else if (document.mozFullScreenElement) api.fullscreenElement = document.mozFullScreenElement;
+    else if (document.msFullscreenElement) api.fullscreenElement = document.msFullscreenElement;
+
+    if (document.fullscreenEnabled) api.fullscreenEnabled = document.fullscreenEnabled;
+    else if (document.webkitFullscreenEnabled) api.fullscreenEnabled = document.webkitFullscreenEnabled;
+    else if (document.mozFullScreenEnabled) api.fullscreenEnabled = document.mozFullScreenEnabled;
+    else if (document.msFullscreenEnabled) api.fullscreenEnabled = document.msFullscreenEnabled;
+
+    if (document.exitFullscreen) api.exitFullscreen = function() { document.exitFullscreen.call(document) };
+    else if (document.webkitExitFullscreen) api.exitFullscreen = function() { document.webkitExitFullscreen.call(document) };
+    else if (document.mozExitFullScreen) api.exitFullscreen = function() { document.mozExitFullScreen.call(document) };
+    else if (document.msExitFullscreen) api.exitFullscreen = function() { document.msExitFullscreen.call(document) };
+
+    if (elmt.requestFullscreen) api.requestFullscreen = function() { elmt.requestFullscreen.call(elmt) };
+    else if (elmt.webkitRequestFullscreen) api.requestFullscreen = function() { elmt.webkitRequestFullscreen.call(elmt) };
+    else if (elmt.msRequestFullscreen) api.requestFullscreen = function() { elmt.msRequestFullscreen.call(elmt) };
+    else if (elmt.mozRequestFullScreen) api.requestFullscreen = function() { elmt.mozRequestFullScreen.call(elmt) };
+
+    return api;
+  },
+
+  implements : function(iface, obj) {
+      if (typeof iface == 'string') {
+          if (typeof Skel.interfaces == 'undefined' || typeof Skel.interfaces[iface] == 'undefined') throw "No interface '"+iface+"' defined! You can define this interface by adding an array with interface methods and property names to the Skel.interfaces hash like so: `Skel.interfaces['"+iface+"'] = [ 'method1', 'method2', 'property1', 'property2', '...' ];`";
+          iface = Skel.interfaces[iface];
+      } else {
+          if (typeof iface != 'object' || typeof iface.length == 'undefined') throw "You must pass either an array containing method and property names or the name of a defined interface as the first parameter!";
+      }
+      for (var i = 0; i < iface.length; i++) {
+          if (typeof obj[iface[i]] == 'undefined') return false;
+      }
+      return true;
+  }
 }
 

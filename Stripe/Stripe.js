@@ -18,7 +18,7 @@ Skel.Stripe = {
       },
       functions : {
         addSubmitListener : function(form, conf) {
-          console.log('Adding listener');
+          //console.log('Adding listener');
           form.addEventListener('submit', function(e) { conf.functions.formOnSubmit(e, form, config); });
         },
 
@@ -37,14 +37,14 @@ Skel.Stripe = {
           var submits = document.querySelectorAll(conf.selectors.form + ' ' + conf.selectors.submitButton);
           for(var i = 0; i < submits; i++) submits[i].disabled = true;
           e.preventDefault();
-          console.log('Prevented submission');
+          //console.log('Prevented submission');
 
           var key = form.querySelectorAll(conf.selectors.key);
           if (key.length == 0) throw "Can't find stripe key. Searched at '"+conf.selectors.form+" "+conf.selectors.key+"'";
           key = key[0];
 
           Stripe.setPublishableKey(key.value);
-          console.log('Set key: '+key.value);
+          //console.log('Set key: '+key.value);
           Stripe.card.createToken(form, function (stat, response) { conf.functions.stripeReturnHandler(stat, response, form, conf); });
         },
 

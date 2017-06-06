@@ -1,4 +1,4 @@
-if (typeof Skel ==' undefined') Skel = {};
+if (typeof Skel == 'undefined') Skel = {};
 
 /**
  * Observable - a base Observable class that allows objects to handle and delegate
@@ -24,9 +24,9 @@ if (typeof Skel ==' undefined') Skel = {};
  */
 
 Skel.Observable = function() {
+  this.listeners = {};
 }
 Skel.Observable.prototype = Object.create(Object.prototype);
-Skel.Observable.prototype.listeners = {};
 
 /**
  * Checks to see if the given `listener` is registered for the given `eventType`

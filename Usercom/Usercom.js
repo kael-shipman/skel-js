@@ -7,6 +7,7 @@ Skel.Usercom = function(config) {
 }
 
 Skel.Usercom.prototype = Object.create(Object.prototype);
+Skel.Usercom.prototype.timeouts = {};
 Skel.Usercom.instance = null;
 
 // Default Configuration
@@ -26,7 +27,7 @@ Skel.Usercom.prototype.config = {
       'heading' : 'Messages'
     }
   },
-  logTemplate : '<section class="block usercom-container ##type##-log active" data-logType="##type##"><div class="body-frame"><div class="standard-padding msg-container"><h4>##heading##</h4><div class="action-close">x</div>##msg##</div></div></section>'
+  logTemplate : '<section class="block usercom-container ##type##-log active" data-logType="##type##"><h4>##heading##</h4><div class="action-close">x</div><div class="standard-padding msg-container">##msg##</div></section>'
 }
 
 Skel.Usercom.prototype.scrapeExisting = function() {
@@ -44,14 +45,26 @@ Skel.Usercom.prototype.scrapeExisting = function() {
 
 Skel.Usercom.prototype.elementMessageHandler = null;
 
-Skel.Usercom.prototype.alert = function(type, msg, elmtSelector, isHtml) {
+Skel.Usercom.prototype.getLogContainer = function() {
+  var container = document.getElementsByClassName(this.config.logContainerClass);
+  if (container.length > 0) return container[0];
+  else {
+    container = document.createElement('div');
+    container.className = this.config.logContainerClass;
+    document.body.appendChild(container);
+    return container;
+  }
+}
+
+
+Skel.Usercom.prototype.alert = function(type, heading, msg, sticky, elmtSelector, isHtml) {
   if (elmtSelector && this.elementMessageHandler) this.elementMessageHandler(type, msg, elmtSelector, isHtml);
   else {
-    var i, j, selector, logHTML, log, templateVars, logContainer, div;
+    var i, j, selector, logHTML, log, templateVars, logContainer, div, first;
     var usercom = this;
 
     // Prepare message
-    if (!isHtml) msg = '<p>'+msg+'</p>';
+    if (!isHtml) msg = '<p class="msg">'+msg+'</p>';
 
     // If log is already showing, add messages to it
     selector = '.' + type + this.config.logBaseClass + ' .' + this.config.msgContainerClass;
@@ -61,28 +74,34 @@ Skel.Usercom.prototype.alert = function(type, msg, elmtSelector, isHtml) {
       div.innerHTML = msg;
       msg = div.children[0];
       for(i = 0; i < log.length; i++) log[i].appendChild(msg);
+      first = false;
 
     // If not showing, create it from template
     } else {
       // Set up template and variables from config
       templateVars = this.config.logTemplateVars || {};
-      templateVars['##heading##'] = this.config.typeSpecificAttrs[type]['heading'];
+      templateVars['##heading##'] = heading;
       templateVars['##type##'] = type;
       templateVars['##msg##'] = msg;
       logHTML = this.config.logTemplate;
 
       // Apply vars to template and attach log to page
       for(i in templateVars) logHTML = logHTML.replace(new RegExp(i, 'g'), templateVars[i]);
-      logContainer = document.getElementsByClassName(this.config.logContainerClass);
-      for(i = 0; i < logContainer.length; i++) {
-        logContainer[i].innerHTML += logHTML;
-        log = logContainer[i].getElementsByClassName(type+this.config.logBaseClass);
-        for(j = 0; j < log.length; j++) this.loadCloseLinks(log[j]);
-      }
+
+      log = document.createElement('div');
+      log.innerHTML = logHTML;
+      log = log.children[0];
+
+      logContainer = this.getLogContainer();
+      logContainer.appendChild(log);
+      this.loadCloseLinks(log);
+
+      first = true;
     }
 
-    // Reset the timeout for this log
-    this.setLogTimeout(type, (new Date()).getTime() + (this.config.logTimeoutSeconds*1000));
+    // Handle stickiness
+    if (sticky) this.timeouts[type] = null;
+    else if (first || this.timeouts[type]) this.setLogTimeout(type, (new Date()).getTime() + (this.config.logTimeoutSeconds*1000));
   }
 }
 
@@ -92,11 +111,11 @@ Skel.Usercom.prototype.alertFromJson = function(json) {
   for (type in json) {
     msgs = [];
     for(elmt in json[type]['elements']) {
-      for(i = 0; i < json[type]'elements'][elmt].length; i++) msgs.push(json[type]['elements'][elmt][i]);
+      for(i = 0; i < json[type]['elements'][elmt].length; i++) msgs.push(json[type]['elements'][elmt][i]);
     }
     for(i = 0; i < json[type]['general'].length; i++) msgs.push(json[type]['general'][i]);
 
-    for(i = 0; i < msgs.length; i++) this.alert(type, msgs[i].msg, msgs[i].elmtSelector, msgs[i].isHtml);
+    for(i = 0; i < msgs.length; i++) this.alert(type, this.config.typeSpecificAttrs[type].heading, msgs[i].msg, false, msgs[i].elmtSelector, msgs[i].isHtml);
   }
 }
 
@@ -143,19 +162,23 @@ Skel.Usercom.prototype.setLogTimeout = function(type, timeout) {
 
 Skel.Usercom.prototype.destroyLog = function(type, immediate) {
   this.timeouts[type] = null;
-  var logs = document.getElementsByClassName(type + this.config.logBaseClass);
+  var logContainer = this.getLogContainer();
+  var logs = logContainer.getElementsByClassName(type + this.config.logBaseClass);
   for(var i = 0; i < logs.length; i++) {
     if (immediate) {
       logs[i].parentNode.removeChild(logs[i]);
+      if (logContainer.children.length == 0) logContainer.parentNode.removeChild(logContainer);
     } else {
       Skel.Utils.transitionDisplay(logs[i], {
-        fadeOutDelay : 2500,
-        onFadeOut : (function(elmt) { return function() {
+        disappearDelay : 2500,
+        onDisappear : (function(elmt) { return function() {
           elmt.parentNode.removeChild(elmt);
+          if (logContainer.children.length == 0) logContainer.parentNode.removeChild(logContainer);
         }})(logs[i])
       });
     }
   }
 }
+
 
 

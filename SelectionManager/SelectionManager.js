@@ -1,4 +1,4 @@
-if (typeof Skel ==' undefined') Skel = {};
+if (typeof Skel == 'undefined') Skel = {};
 
 /**
  * SelectionManager - An Item selection manager
@@ -47,7 +47,7 @@ if (typeof Skel ==' undefined') Skel = {};
  */
 Skel.SelectionManager = function(container, options) {
   // Inherit from Observable
-  Observable.call(this);
+  Skel.Observable.call(this);
 
   if (!(container instanceof HTMLElement)) throw "'container' must be an HTMLElement object!";
 
@@ -88,17 +88,17 @@ Skel.SelectionManager = function(container, options) {
   var i;
   for (i = 0; i < forwards.length; i++) this.registerControl('forward', forwards[i]);
   for (i = 0; i < backwards.length; i++) this.registerControl('backward', backwards[i]);
-  for (i = 0; i < this.items.length; i++) this.registerInternalListener('onItemClick', this.items[i]);
+  for (i = 0; i < this.items.length; i++) this.mapClickEvent('onItemClick', this.items[i]);
+
+  this.previousItem = null;
+  this.selectedItem = null;
+  this.currentIndex = null;
+  this.scrollAnimator = null;
 
   return this;
 }
 
-Skel.SelectionManager.prototype = Object.create(Observable.prototype);
-
-Skel.SelectionManager.prototype.previousItem = null,
-Skel.SelectionManager.prototype.selectedItem = null,
-Skel.SelectionManager.prototype.currentIndex = null,
-Skel.SelectionManager.prototype.scrollAnimator = null,
+Skel.SelectionManager.prototype = Object.create(Skel.Observable.prototype);
 
 /** Checks to make sure the minimum requirements for functionality are met */
 Skel.SelectionManager.prototype.sanityCheck = function() {
@@ -133,27 +133,25 @@ Skel.SelectionManager.prototype.registerControl = function(control, elmt) {
     var me = this;
     var eventName = 'on'+control.substr(0,1).toUpperCase()+control.substr(1)+'Click';
     this.controls[control].push(elmt);
-    this.registerInternalListener(eventName, elmt);
+    this.mapClickEvent(eventName, elmt);
   }
   return this;
 }
 
 /**
- * Registers a low-level click listener on an element that fires a custom Click event.
+ * Maps an HTML element's `click` event to a specific internal `click` method.
  *
- * This is used to register click events on HTML elements for controls and items, among
- * possible other things.
+ * This is used to map clicks on various types of HTML elements within the selection manager (e.g., `item`,
+ * `control`, etc.) to methods that handle actions for those items within the class.
  *
  * @param String eventName - the full name of the event (e.g., `onForwardClick` or `onItemClick`)
  * @param HTMLElement elmt - the element to which the click listener will be attached
  *
- * Note that this is different from `addEventListener` (inherited from Observable) in that
- * `addEventListener` allows any object to be an observer for arbitrary events produced by the
- * object, while `registerInternalListener` is used to register specific controls as an observers of
- * HTML Elements' `click` events. (That is, one is used to register controls, while the other
- * is used to register responders.)
+ * Current real uses of this function are to map a click on one of the `control` buttons (forward or backward)
+ * to the `onForwardClick` and `onBackwardClick` events, respectively, and to map a click on an item to
+ * `onItemClick`.
  */
-Skel.SelectionManager.prototype.registerInternalListener = function(eventName, elmt) {
+Skel.SelectionManager.prototype.mapClickEvent = function(eventName, elmt) {
   var me = this;
 
   // Check to see if the event is valid
@@ -201,8 +199,11 @@ Skel.SelectionManager.prototype.selectItem = function(elmt) {
 
   // If there's a selected image
   if (this.selectedItem) {
-    // If it's the same image, just return
-    if (this.selectedItem.isSameNode(elmt)) return;
+    // If it's the same image, just recenter and return
+    if (this.selectedItem.isSameNode(elmt)) {
+      this.scroll(null, this.selectedItem);
+      return;
+    }
 
     // Otherwise, deselect whatever image is currently selected
     this.deselectItem(this.selectedItem, true);
@@ -302,7 +303,7 @@ Skel.ScrollingSelectionManager.prototype.scroll = function(dir, item) {
 
   var pattern = /^(-?[\d.]+)(\D*)$/;
   var matches = pattern.exec(currentMargin);
-  if (!matches) throw "currentMargin set to unintelligible amount (" + currentMargin + ")";
+  if (!matches) throw "currentMargin set to amount that we don't know how to handle (" + currentMargin + ")";
 
   var marginUnit = matches[2];
   currentMargin = matches[1]*1;

@@ -3,13 +3,41 @@
   <head>
     <meta charset="UTF-8">
     <title>Example</title>
+    <script type="text/javascript" src="../Utils/Utils.js"></script>
     <script type="text/javascript" src="../Observable/Observable.js"></script>
     <script type="text/javascript" src="SelectionManager.js"></script>
     <script type="text/javascript">
       document.addEventListener('DOMContentLoaded', function() {
         var sms = document.getElementsByClassName('items-viewer');
-        for(var i = 0; i < sms.length; i++) new Skel.ScrollingSelectionManager(sms[i]);
+        for(var i = 0; i < sms.length; i++) {
+          var sm = new Skel.ScrollingSelectionManager(sms[i]);
+
+          // Load fullscreen capabilities
+          var fsLink = document.getElementsByClassName('fs');
+          for (var j = 0; j < fsLink.length; j++) {
+            fsLink[j].addEventListener('click', (function(m) {
+              return function(e) {
+                var fs = Skel.Utils.createFullscreenApi(m.container);
+                fs.requestFullscreen();
+                setTimeout(function() { m.selectItem(m.selectedItem); }, 40);
+              }
+            })(sm));
+          }
+
+          sm.addEventListener('itemClick', {
+            respondToEvent : function(eventName, src) {
+              if (eventName == 'itemClick') {
+                var fs = Skel.Utils.createFullscreenApi(src.container);
+                if (!fs.fullscreenElement) return;
+
+                fs.exitFullscreen();
+                setTimeout(function() { src.selectItem(src.selectedItem); }, 40);
+              }
+            }
+          });
+        }
       });
+
     </script>
 
     <style type="text/css">
@@ -109,6 +137,8 @@ body {
           <div class="item">17</div>
         </div>
       </div>
+
+      <p><a href="#" class="fs">Go Full Screen</a></p>
 
       <h2>How to use it</h2>
       <p>(See source code comments for specifics.)</p>
